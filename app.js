@@ -1,5 +1,5 @@
 /* =============================================
-   BEIGE COFFEE — Mallow-style Application Script
+   BEIGE COFFEE — Oak Earth Application Script
    ============================================= */
 
 // ===== CART STATE =====
@@ -21,7 +21,6 @@ function renderCart() {
   const items = getCartItems();
   const totalQty = items.reduce((s, i) => s + i.qty, 0);
 
-  // Update badge
   if (cartCount) {
     if (totalQty > 0) {
       cartCount.textContent = totalQty;
@@ -31,7 +30,6 @@ function renderCart() {
     }
   }
 
-  // Clear existing items (keep empty div)
   Array.from(cartItemsEl.children).forEach(child => {
     if (child.id !== 'cartEmpty') child.remove();
   });
@@ -47,16 +45,16 @@ function renderCart() {
 
   items.forEach(item => {
     const div = document.createElement('div');
-    div.className = 'bg-white border-4 border-[#1A3D44] asym-border p-4 mb-4 flex items-center gap-4';
+    div.className = 'cart-item';
     div.innerHTML = `
-      <div class="flex-1">
-        <div class="font-bold text-lg">${item.name}</div>
-        <div class="text-[#D67D4C] font-bold">₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">₹${item.price} × ${item.qty} = ₹${item.price * item.qty}</div>
       </div>
-      <div class="flex items-center gap-2 bg-[#FDF9F3] border-2 border-[#1A3D44] rounded-2xl px-3 py-1">
-        <button class="qty-btn text-xl hover:text-[#D67D4C] transition-colors" data-action="dec" data-key="${item.key}"><iconify-icon icon="lucide:minus"></iconify-icon></button>
-        <span class="font-bold w-6 text-center">${item.qty}</span>
-        <button class="qty-btn text-xl hover:text-[#408F9E] transition-colors" data-action="inc" data-key="${item.key}"><iconify-icon icon="lucide:plus"></iconify-icon></button>
+      <div class="qty-controls">
+        <button class="qty-btn" data-action="dec" data-key="${item.key}"><iconify-icon icon="lucide:minus"></iconify-icon></button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" data-action="inc" data-key="${item.key}"><iconify-icon icon="lucide:plus"></iconify-icon></button>
       </div>
     `;
     cartItemsEl.appendChild(div);
@@ -73,23 +71,24 @@ function renderCart() {
   if (totalEl) totalEl.textContent = `₹${total}`;
 }
 
-// Qty button delegation
-document.getElementById('cartItems').addEventListener('click', e => {
-  const btn = e.target.closest('.qty-btn');
-  if (!btn) return;
-  const key = btn.dataset.key;
-  const action = btn.dataset.action;
-  if (!cart[key]) return;
-  if (action === 'inc') {
-    cart[key].qty++;
-  } else {
-    cart[key].qty--;
-    if (cart[key].qty <= 0) delete cart[key];
-  }
-  renderCart();
-});
+const cartItemsEl = document.getElementById('cartItems');
+if (cartItemsEl) {
+  cartItemsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.qty-btn');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    const action = btn.dataset.action;
+    if (!cart[key]) return;
+    if (action === 'inc') {
+      cart[key].qty++;
+    } else {
+      cart[key].qty--;
+      if (cart[key].qty <= 0) delete cart[key];
+    }
+    renderCart();
+  });
+}
 
-// Add to cart
 const menuGrid = document.getElementById('menuGrid');
 if (menuGrid) {
   menuGrid.addEventListener('click', e => {
@@ -97,47 +96,35 @@ if (menuGrid) {
     if (!btn) return;
     const name = btn.dataset.name;
     const price = parseInt(btn.dataset.price);
-    const key = name.toLowerCase().replace(/\s+/g, '-');
+    const key = name.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '');
     if (cart[key]) {
       cart[key].qty++;
     } else {
       cart[key] = { key, name, price, qty: 1 };
     }
-    btn.classList.add('scale-110');
+    btn.classList.add('added');
     btn.innerHTML = '<iconify-icon icon="lucide:check"></iconify-icon>';
     setTimeout(() => {
-      btn.classList.remove('scale-110');
+      btn.classList.remove('added');
       btn.innerHTML = '<iconify-icon icon="lucide:plus"></iconify-icon>';
-    }, 600);
+    }, 500);
     renderCart();
   });
 }
 
-// Cart open/close
+// Cart open/close (Oak Earth uses .open class)
 const cartOverlay = document.getElementById('cartOverlay');
 const cartDrawer = document.getElementById('cartDrawer');
 
 function openCart() {
-  if (cartDrawer) {
-    cartDrawer.classList.remove('translate-x-full');
-    cartDrawer.classList.add('translate-x-0');
-  }
-  if (cartOverlay) {
-    cartOverlay.classList.remove('opacity-0', 'pointer-events-none');
-    cartOverlay.classList.add('opacity-100');
-  }
+  if (cartDrawer) cartDrawer.classList.add('open');
+  if (cartOverlay) cartOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 
 function closeCart() {
-  if (cartDrawer) {
-    cartDrawer.classList.add('translate-x-full');
-    cartDrawer.classList.remove('translate-x-0');
-  }
-  if (cartOverlay) {
-    cartOverlay.classList.add('opacity-0', 'pointer-events-none');
-    cartOverlay.classList.remove('opacity-100');
-  }
+  if (cartDrawer) cartDrawer.classList.remove('open');
+  if (cartOverlay) cartOverlay.classList.remove('open');
   document.body.style.overflow = '';
 }
 
@@ -149,16 +136,10 @@ if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCart);
 
 if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
 
-document.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (cartDrawer && cartDrawer.classList.contains('translate-x-0')) closeCart();
-  else if (mobileMenu && !mobileMenu.classList.contains('translate-x-full')) closeMobileMenu();
-});
-
-// WhatsApp checkout - update link with cart items when cart has items
+// WhatsApp checkout
 const checkoutBtn = document.getElementById('checkoutBtn');
 if (checkoutBtn) {
-  checkoutBtn.addEventListener('click', (e) => {
+  checkoutBtn.addEventListener('click', e => {
     const items = getCartItems();
     if (items.length === 0) {
       e.preventDefault();
@@ -180,7 +161,7 @@ let currentCat = 'all';
 function updateMenuVisibility() {
   const cards = Array.from(document.querySelectorAll('.menu-card'));
   let shown = 0;
-  cards.forEach((card, i) => {
+  cards.forEach(card => {
     const matches = currentCat === 'all' || card.dataset.cat === currentCat;
     if (!matches) {
       card.style.display = 'none';
@@ -205,12 +186,8 @@ function updateMenuVisibility() {
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => {
-      b.classList.remove('active', 'bg-[#1A3D44]', 'text-white');
-      b.classList.add('bg-white', 'border-2', 'border-[#1A3D44]', 'text-[#1A3D44]');
-    });
-    btn.classList.add('active', 'bg-[#1A3D44]', 'text-white');
-    btn.classList.remove('bg-white', 'border-2', 'border-[#1A3D44]', 'text-[#1A3D44]');
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     currentCat = btn.dataset.cat;
     visibleCount = ITEMS_PER_PAGE;
     updateMenuVisibility();
@@ -225,23 +202,21 @@ if (loadMoreBtn) {
   });
 }
 
-// Initial state: show first ITEMS_PER_PAGE items
-visibleCount = ITEMS_PER_PAGE;
 updateMenuVisibility();
 
 // ===== NEWSLETTER =====
 const newsletterForm = document.getElementById('newsletterForm');
 if (newsletterForm) {
-  newsletterForm.addEventListener('submit', (e) => {
+  newsletterForm.addEventListener('submit', e => {
     e.preventDefault();
     const input = newsletterForm.querySelector('input[type="email"]');
     if (input && input.value.trim()) {
-      newsletterForm.innerHTML = '<p class="text-[#408F9E] font-bold">✓ You\'re subscribed! Welcome to the Beige family.</p>';
+      newsletterForm.innerHTML = '<p style="color: #D4A574; font-weight: 600;">✓ You\'re subscribed! Welcome to the Beige family.</p>';
     }
   });
 }
 
-// ===== MOBILE MENU =====
+// ===== MOBILE MENU (Oak Earth uses .open class) =====
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const mobileMenuClose = document.getElementById('mobileMenuClose');
 const mobileMenu = document.getElementById('mobileMenu');
@@ -249,21 +224,17 @@ const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
 function openMobileMenu() {
-  if (mobileMenu) mobileMenu.classList.remove('translate-x-full');
-  if (mobileMenuOverlay) {
-    mobileMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
-    mobileMenuOverlay.classList.add('opacity-100');
-  }
+  if (mobileMenu) mobileMenu.classList.add('open');
+  if (mobileMenuOverlay) mobileMenuOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (mobileMenuBtn) mobileMenuBtn.classList.add('open');
 }
 
 function closeMobileMenu() {
-  if (mobileMenu) mobileMenu.classList.add('translate-x-full');
-  if (mobileMenuOverlay) {
-    mobileMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-    mobileMenuOverlay.classList.remove('opacity-100');
-  }
+  if (mobileMenu) mobileMenu.classList.remove('open');
+  if (mobileMenuOverlay) mobileMenuOverlay.classList.remove('open');
   document.body.style.overflow = '';
+  if (mobileMenuBtn) mobileMenuBtn.classList.remove('open');
 }
 
 if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
@@ -271,16 +242,20 @@ if (mobileMenuClose) mobileMenuClose.addEventListener('click', closeMobileMenu);
 if (mobileMenuOverlay) mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 mobileNavLinks.forEach(link => link.addEventListener('click', closeMobileMenu));
 
-// ===== MENU NAV BUTTONS (scroll filter pills) =====
-const filterPills = document.getElementById('filterPills');
-document.querySelectorAll('.menu-nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (!filterPills) return;
-    const dir = btn.dataset.dir;
-    const scrollAmount = 200;
-    filterPills.scrollBy({ left: dir === 'next' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
-  });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (cartDrawer && cartDrawer.classList.contains('open')) closeCart();
+  else if (mobileMenu && mobileMenu.classList.contains('open')) closeMobileMenu();
 });
+
+// ===== NAV SCROLL =====
+const navbar = document.getElementById('navbar');
+if (navbar) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 80) navbar.classList.add('scrolled');
+    else navbar.classList.remove('scrolled');
+  });
+}
 
 // ===== SMOOTH SCROLL =====
 document.querySelectorAll('a[href^="#"]').forEach(a => {
