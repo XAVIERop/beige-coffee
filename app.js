@@ -136,20 +136,85 @@ if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCart);
 
 if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
 
-// WhatsApp checkout
+// Checkout: Plattr (POS) or WhatsApp fallback
 const checkoutBtn = document.getElementById('checkoutBtn');
+const checkoutBtnText = document.getElementById('checkoutBtnText');
+const checkoutModal = document.getElementById('checkoutModal');
+const checkoutForm = document.getElementById('checkoutForm');
+const checkoutName = document.getElementById('checkoutName');
+const checkoutPhone = document.getElementById('checkoutPhone');
+const checkoutCancel = document.getElementById('checkoutCancel');
+const checkoutSubmit = document.getElementById('checkoutSubmit');
+
+function fallbackWhatsApp() {
+  const items = getCartItems();
+  const lines = items.map(i => `• ${i.name} ×${i.qty} = ₹${i.price * i.qty}`).join('%0A');
+  const total = getCartTotal() + Math.round(getCartTotal() * 0.05);
+  const msg = `Hi Beige Coffee!%0A%0AI'd like to place an order:%0A${lines}%0A%0A*Total: ₹${total}*`;
+  window.open(`https://wa.me/919211741666?text=${msg}`, '_blank');
+}
+
 if (checkoutBtn) {
-  checkoutBtn.addEventListener('click', e => {
-    const items = getCartItems();
-    if (items.length === 0) {
-      e.preventDefault();
-      return;
-    }
-    const lines = items.map(i => `• ${i.name} ×${i.qty} = ₹${i.price * i.qty}`).join('%0A');
-    const total = getCartTotal() + Math.round(getCartTotal() * 0.05);
-    const msg = `Hi Beige Coffee!%0A%0AI'd like to place an order:%0A${lines}%0A%0A*Total: ₹${total}*`;
-    window.open(`https://wa.me/919211741666?text=${msg}`, '_blank');
+  checkoutBtn.addEventListener('click', function(e) {
     e.preventDefault();
+    const items = getCartItems();
+    if (items.length === 0) return;
+    if (window.plattrIsReady && window.plattrIsReady()) {
+      checkoutModal.style.display = 'flex';
+      checkoutName.value = '';
+      checkoutPhone.value = '';
+      checkoutName.focus();
+    } else {
+      fallbackWhatsApp();
+    }
+  });
+}
+
+function updateCheckoutButton() {
+  if (!checkoutBtnText) return;
+  if (window.plattrIsReady && window.plattrIsReady()) {
+    checkoutBtnText.textContent = 'Place Order';
+  } else {
+    checkoutBtnText.textContent = 'Order via WhatsApp';
+  }
+}
+updateCheckoutButton();
+window.addEventListener('plattr:ready', updateCheckoutButton);
+
+function closeCheckoutModal() {
+  if (checkoutModal) checkoutModal.style.display = 'none';
+}
+
+if (checkoutCancel) checkoutCancel.addEventListener('click', closeCheckoutModal);
+if (checkoutModal) {
+  const backdrop = checkoutModal.querySelector('.checkout-modal-backdrop');
+  if (backdrop) backdrop.addEventListener('click', closeCheckoutModal);
+}
+
+if (checkoutForm) {
+  checkoutForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = checkoutName?.value?.trim();
+    const phone = checkoutPhone?.value?.trim();
+    if (!name || !phone) return;
+    if (!window.plattrPlaceOrder) { fallbackWhatsApp(); closeCheckoutModal(); return; }
+    checkoutSubmit.disabled = true;
+    checkoutSubmit.textContent = 'Placing...';
+    try {
+      const items = getCartItems();
+      const data = await window.plattrPlaceOrder(items, name, phone);
+      const orderNum = data?.order_number || 'order';
+      alert('Order placed! Order #' + orderNum + '. We will have it ready soon.');
+      cart = {};
+      renderCart();
+      closeCart();
+      closeCheckoutModal();
+    } catch (err) {
+      alert('Order failed: ' + (err.message || 'Please try WhatsApp.'));
+    } finally {
+      checkoutSubmit.disabled = false;
+      checkoutSubmit.textContent = 'Place Order';
+    }
   });
 }
 
@@ -211,7 +276,7 @@ if (newsletterForm) {
     e.preventDefault();
     const input = newsletterForm.querySelector('input[type="email"]');
     if (input && input.value.trim()) {
-      newsletterForm.innerHTML = '<p style="color: #D4A574; font-weight: 600;">✓ You\'re subscribed! Welcome to the Beige family.</p>';
+      newsletterForm.innerHTML = '<p style="color: #C5E02E; font-weight: 600;">✓ You\'re subscribed! Welcome to the Beige family.</p>';
     }
   });
 }

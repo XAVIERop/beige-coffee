@@ -6,8 +6,12 @@
   <title>Beige Coffee | Great coffee. Good vibes. Every day.</title>
   <meta name="description" content="Beige Coffee — Great coffee. Good vibes. Every day. House-roasted specialty coffee, freshly baked goods, and the warm embrace of a laid-back space." />
   <link rel="icon" href="assets/logo.jpg" />
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500&f[]=satoshi@700,500,400&display=swap" />
   <link rel="stylesheet" href="style.css" />
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="plattr.js"></script>
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
@@ -16,8 +20,8 @@
 <nav id="navbar" class="nav">
   <div class="container nav-inner">
     <a href="#hero" class="nav-logo">
-      <img src="assets/logo.jpg" alt="Beige Coffee" class="nav-logo-img" />
-      <span class="nav-logo-text">Beige Coffee</span>
+      <img src="assets/logo.jpg" alt="" class="nav-logo-img" width="40" height="40" />
+      <span class="nav-logo-text">Beige<span class="lime-dot">.</span></span>
     </a>
     <div class="nav-links">
       <a href="#menu">Menu</a>
@@ -49,27 +53,39 @@
 </div>
 
 <!-- ===== HERO ===== -->
-<section id="hero" class="hero">
-  <div class="hero-bg" style="background-image: url('assets/hero.png');"></div>
-  <div class="hero-overlay"></div>
-  <div class="container hero-content">
-    <span class="hero-eyebrow">Organic • Craft • Daily</span>
-    <h1 class="hero-title">Great coffee.<br><em>Good vibes.</em> Every day.</h1>
-    <p class="hero-desc">House-roasted specialty coffee, freshly baked croissants, and the warm embrace of a laid-back space. Your neighborhood sanctuary for the perfect brew.</p>
-    <div class="hero-actions">
-      <a href="#menu" class="btn btn-primary">Explore Menu</a>
-      <a href="#about" class="btn btn-outline">Our Story</a>
+<section id="hero" class="hero hero-minimal">
+  <div class="container hero-minimal-inner">
+    <div class="hero-copy">
+      <span class="hero-kicker">Established 2024</span>
+      <h1 class="hero-mega">
+        CRAFTED<br />
+        <span class="hero-mega-mid"><span class="hero-mega-italic">With</span></span>
+        SOUL.
+      </h1>
+      <p class="hero-lede">Minimalist space. Maximum flavor. House-roasted specialty coffee, fresh bakes, and a laid-back neighbourhood vibe—your ritual, every day.</p>
+      <div class="hero-actions">
+        <a href="#menu" class="btn btn-primary">Explore Menu <iconify-icon icon="lucide:arrow-right"></iconify-icon></a>
+        <a href="#about" class="btn btn-outline">Our Story</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-blob" aria-hidden="true"></div>
+      <img src="assets/hero.png" alt="Coffee at Beige Coffee" class="hero-shot" width="720" height="900" loading="eager" />
+      <div class="hero-float-card">
+        <div class="hero-float-stars" aria-hidden="true">★★★★★</div>
+        <p class="hero-float-quote">“Best flat white in the neighbourhood. Minimalist vibes done right.”</p>
+        <p class="hero-float-by">— Google Review</p>
+      </div>
     </div>
   </div>
-  <div class="scroll-indicator">Scroll</div>
 </section>
 
 <!-- ===== MENU ===== -->
 <section id="menu" class="section-pad menu-section">
   <div class="container">
-    <div class="section-header border-b">
-      <h2 class="section-title serif">The Good Stuff</h2>
-      <p class="section-eyebrow">Updated Seasonally</p>
+    <div class="section-header border-b menu-section-head">
+      <p class="section-eyebrow menu-eyebrow">The Good Stuff</p>
+      <h2 class="section-title serif menu-section-title">Full Menu</h2>
     </div>
     <div id="filterPills" class="menu-filter-wrap">
       <button class="filter-btn active" data-cat="all">All</button>
@@ -242,6 +258,7 @@
       <div class="menu-card" data-cat="addons"><div class="menu-card-inner"><h3 class="menu-card-name">Espresso Shot</h3><div class="menu-card-footer"><span class="menu-price">₹100</span><button class="add-btn" data-name="Espresso Shot" data-price="100"><iconify-icon icon="lucide:plus"></iconify-icon></button></div></div></div>
       <div class="menu-card" data-cat="addons"><div class="menu-card-inner"><h3 class="menu-card-name">Almond Milk</h3><div class="menu-card-footer"><span class="menu-price">₹100</span><button class="add-btn" data-name="Almond Milk" data-price="100"><iconify-icon icon="lucide:plus"></iconify-icon></button></div></div></div>
       <div class="menu-card" data-cat="addons"><div class="menu-card-inner"><h3 class="menu-card-name">Oat Milk</h3><div class="menu-card-footer"><span class="menu-price">₹90</span><button class="add-btn" data-name="Oat Milk" data-price="90"><iconify-icon icon="lucide:plus"></iconify-icon></button></div></div></div>
+    </div>
     <div class="load-more-wrap" id="loadMoreWrap">
       <button id="loadMoreBtn" class="btn btn-outline">Load more</button>
     </div>
@@ -250,18 +267,15 @@
 
 <!-- ===== ABOUT / STORY ===== -->
 <section id="about" class="section-pad about-section">
-  <div class="container about-grid">
-    <div class="about-image-wrap">
-      <img src="assets/cafe-interior.png" alt="Beige Coffee interior" loading="lazy" />
-      <div class="about-image-badge">
-        <span class="number">8am</span>
-        <span class="label">to 11pm daily</span>
-      </div>
+  <div class="container about-grid about-grid-minimal">
+    <div class="about-images">
+      <img src="assets/cafe-interior.png" alt="Beige Coffee interior" class="about-img about-img-a" loading="lazy" />
+      <img src="assets/coffee-selection.png" alt="Coffee selection at Beige Coffee" class="about-img about-img-b" loading="lazy" />
     </div>
     <div class="about-content">
       <span class="section-eyebrow">Our Story</span>
-      <h2 class="section-title serif">More than a <em>caffeine fix</em>.</h2>
-      <p class="section-subtitle">At Beige Coffee, we believe the best conversations happen over a warm mug. Our space is designed to be your home away from home—whether you're crushing emails or catching up with your favorite human.</p>
+      <h2 class="section-title serif">Purity in every bean.<br />Clarity in every sip.</h2>
+      <p class="section-subtitle">At Beige Coffee, we believe the best conversations happen over a warm mug. Our space is your home away from home—whether you're working through the day or catching up with your favourite human.</p>
       <div class="about-features">
         <div class="about-feature">
           <span class="about-feature-icon"><iconify-icon icon="lucide:coffee"></iconify-icon></span>
@@ -353,7 +367,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <img src="assets/logo.jpg" alt="Beige Coffee" class="footer-logo-img" />
-        <span class="footer-logo serif">Beige Coffee</span>
+        <span class="footer-logo serif">Beige<span class="lime-dot">.</span></span>
         <p>Spreading joy one cup at a time. House-roasted specialty coffee, freshly baked goods, and authentic food—every day, from scratch.</p>
         <div class="social-links">
           <a href="https://www.instagram.com/beigecoffee.in/" target="_blank" rel="noopener" class="social-link" aria-label="Instagram"><iconify-icon icon="lucide:instagram"></iconify-icon></a>
@@ -371,7 +385,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Beige Coffee. Made with joy and ☕</span>
+      <span>© 2026 Beige Coffee. Made with joy and ☕</span>
     </div>
   </div>
 </footer>
@@ -396,8 +410,24 @@
     <div class="cart-total"><span>Total</span><span id="cartTotal">₹0</span></div>
     <a href="https://wa.me/919211741666" id="checkoutBtn" class="btn checkout-btn">
       <iconify-icon icon="lucide:message-circle"></iconify-icon>
-      Order via WhatsApp
+      <span id="checkoutBtnText">Place Order</span>
     </a>
+  </div>
+</div>
+
+<!-- Checkout modal (Plattr) -->
+<div id="checkoutModal" class="checkout-modal" style="display:none">
+  <div class="checkout-modal-backdrop"></div>
+  <div class="checkout-modal-box">
+    <h3 class="serif">Complete your order</h3>
+    <form id="checkoutForm">
+      <label><span>Name</span><input type="text" id="checkoutName" required placeholder="Your name" /></label>
+      <label><span>Phone</span><input type="tel" id="checkoutPhone" required placeholder="+91 " /></label>
+      <div class="checkout-modal-actions">
+        <button type="button" id="checkoutCancel" class="btn btn-outline">Cancel</button>
+        <button type="submit" id="checkoutSubmit" class="btn btn-primary">Place Order</button>
+      </div>
+    </form>
   </div>
 </div>
 
